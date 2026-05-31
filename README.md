@@ -21,6 +21,8 @@ The ESP32-C3 supermini board used in this project can also be sourced from AliEx
 
 - [https://nl.aliexpress.com/item/1005006056663228.html](https://nl.aliexpress.com/item/1005006056663228.html)
 
+Check that the board has 2x8 pins (if you want to use the PCB in this project).
+
 The OLED module is a standard I2C Oled module and can also be sources from AliExpress:
 
 - [https://nl.aliexpress.com/item/1005007551771400.html](https://nl.aliexpress.com/item/1005007551771400.html)

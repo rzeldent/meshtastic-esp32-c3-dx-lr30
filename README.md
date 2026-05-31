@@ -57,4 +57,10 @@ This board uses the Heltec ESP32-C3 `pins_arduino.h` and `variant.h` definitions
 - Upload to the ESP32-C3 
 - Use the Meshtastic app (from the Apple store to connect)
 
-Enjoy
+## Final result
+
+The result is a compact Mestastic device
+
+![](assets/IMG_7261.jpg)
+
+![](assets/IMG_7262.jpg)

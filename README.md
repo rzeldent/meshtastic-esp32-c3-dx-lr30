@@ -1,44 +1,53 @@
-# Meshtastic-esp32-c3-dx-lr30
-DIY Meshtastic node with ESP32-C3 supermini and DX-LR30 LoRa module
+# Meshtastic ESP32-C3 + DX-LR30
 
-This repository contains the schematic, PCB layout, and Gerber files needed to manufacture a PCB on https://easyeda.com/.
-It also includes the modifications required to use the Meshtastic firmware with this hardware design.
+DIY Meshtastic node using an ESP32-C3 supermini and an SX1262-based DX-LR30 LoRa module.
 
-The firmware is an adaptation of the `helltec_esp32c3` board configuration, with custom pin changes to support the DX-LR30 module and the supermini board wiring.
-The idea was to imitate the [Heltec HT-CT62](https://heltec.org/project/ht-ct62/) so this Meshtastic profile could be used.
+This repository includes:
+- PCB schematic files
+- PCB layout and EasyEDA board files
+- Generated Gerber files for fabrication
+- Modified Meshtastic firmware support for the Heltec ESP32-C3 variant with custom pin mappings
 
-## Sourcing the DX-LR30 module
+The design is intended to provide a compact custom Meshtastic node with a small OLED display and LoRa radio.
 
-This design targets the SX1262-based DX-LR30 LoRa module. A known AliExpress listing is:
+## Hardware
 
-- [https://nl.aliexpress.com/item/1005009833029680.html](https://nl.aliexpress.com/item/1005009833029680.html).
+### Target modules
+- DX-LR30 LoRa module (SX1262)
+- ESP32-C3 supermini board
+- Standard I2C OLED module (SSD1306-compatible)
 
-The MCU module is not required. There is the possibility to buy two modules, antennas and (not used) Dupont cables.
+### Recommended sourcing
+- DX-LR30 module: https://nl.aliexpress.com/item/1005009833029680.html
+- ESP32-C3 supermini board: https://nl.aliexpress.com/item/1005006056663228.html
+- I2C OLED module: https://nl.aliexpress.com/item/1005007551771400.html
 
-Important: Do not use the 433 MHz variants; they should work but Meshtastic runs on 868 Mhz (at least in the European Union).
-
-The ESP32-C3 supermini board used in this project can also be sourced from AliExpress:
-
-- [https://nl.aliexpress.com/item/1005006056663228.html](https://nl.aliexpress.com/item/1005006056663228.html)
-
-Check that the board has 2x8 pins (if you want to use the PCB in this project).
-
-The OLED module is a standard I2C Oled module and can also be sources from AliExpress:
-
-- [https://nl.aliexpress.com/item/1005007551771400.html](https://nl.aliexpress.com/item/1005007551771400.html)
+> Important: Do not use 433 MHz DX-LR30 variants for Meshtastic if you intend to run 868 MHz firmware. This design targets 868 MHz operation (European Union frequencies).
 
 ## What is included
 
-- `schematic/` - project schematic files for the ESP32-C3 supermini and DX-LR30 module.
-- `pcb/` - PCB layout files and board design exported from EasyEDA.
-- Gerber files for PCB fabrication.
-- Modified Meshtastic firmware support for the Heltec ESP32-C3 variant with updated pin assignments.
+- `schematic/` — EasyEDA schematic files for the ESP32-C3 and DX-LR30 connections
+- `pcb/` — EasyEDA PCB design files and layout
+- Gerber export files for PCB fabrication
+- Custom Meshtastic firmware changes for the Heltec ESP32-C3 board variant
 
-## ESP32-C3 to DX-LR30 pin mapping
+## Firmware adaptation
 
-This board uses the Heltec ESP32-C3 `pins_arduino.h` and `variant.h` definitions. The SX1262-based DX-LR30 wiring is mapped as follows:
+This project is based on the Heltec ESP32-C3 board configuration. The firmware changes update pin definitions to match the DX-LR30 module and the custom board wiring.
 
-| Arduino pin name | ESP32-C3 GPIO | DX-LR30 signal | Function |
+To build the firmware:
+1. Install PlatformIO.
+2. Copy the modified files from this repository into `meshtastic/variants/esp32c3/heltec_esp32c3/`.
+3. Open the Meshtastic project in PlatformIO.
+4. Run the build command for the Heltec ESP32-C3 environment.
+   - Example: `pio run -e heltec_esp32c3`
+5. Upload to the ESP32-C3 using `pio run -e heltec_esp32c3 -t upload`.
+
+## Pin mappings
+
+### DX-LR30 wiring
+
+| Board pin | ESP32-C3 GPIO | DX-LR30 signal | Function |
 |---|---|---|---|
 | `SS` | `GPIO8` | `NSS` / `CS` | SPI chip select |
 | `SCK` | `GPIO9` | `SCK` | SPI clock |
@@ -51,43 +60,36 @@ This board uses the Heltec ESP32-C3 `pins_arduino.h` and `variant.h` definitions
 | `GND` | — | `GND` | Ground |
 
 - `DIO0` and `DIO2` are not connected in this variant (`RADIOLIB_NC`).
+- `GPIO8` is shared with the board blue LED, so radio activity may also light the LED and slightly increase power consumption.
 
-> Note: Pin names and numbering reflect the Heltec ESP32-C3 board variant. Use this table as the reference for the custom Meshtastic firmware adaptation and PCB wiring in this project.
+### OLED wiring
 
-## ESP32-C3 to OLED pin mapping
-
-The OLED display is connected using the Heltec board's I2C definitions from `pins_arduino.h` and `variant.h`.
-
-| Arduino pin name | ESP32-C3 GPIO | OLED signal | Function |
+| Board pin | ESP32-C3 GPIO | OLED signal | Function |
 |---|---|---|---|
 | `SDA` | `GPIO20` | `SDA` | I2C data |
 | `SCL` | `GPIO21` | `SCL` | I2C clock |
 | `3V3` | — | `VCC` | Power supply |
 | `GND` | — | `GND` | Ground |
 
-> Note: This project uses a standard I2C SSD1306 OLED module. The OLED reset pin is not explicitly mapped in this variant.
+## Usage
 
-## Building
+- After flashing, pair the node using the Meshtastic mobile app.
+- Use the app to configure region, frequency, and device settings.
+- Verify the board is powered by 3.3V and that the LoRa antenna is properly connected.
 
-- Use platformIO to build the esp32 firmware (I did not use the development container)
-- Before compiling, replace the files in the Heltec esp32c3 directory with the files provided in the meshtastic directory; these will change the target and the pin mapping.
-- Upload to the ESP32-C3 
-- Use the Meshtastic app (from the Apple store to connect)
+## Known issues and notes
+
+- MOSI and SCK are currently swapped in the implementation and should be fixed in a future revision.
+- `GPIO8` is also connected to the blue LED, which increases idle power use.
+- The red board LED cannot be turned off in this design, so it consumes some power continuously.
+- An ESP32-S3 board with PSRAM is a better choice for a future version, because it supports message storage and forwarding more easily.
+- I2C is remapped to `GPIO20` / `GPIO21`; the original ESP32 mapping was `GPIO1` / `GPIO0`.
+- Unused GPIOs are available for additional peripherals such as a buzzer or extra I/O.
 
 ## Final result
 
-The result is a compact Mestastic device
+The finished build is a compact Meshtastic node with a small OLED and DX-LR30 LoRa radio.
 
 ![Project - OLED side](assets/IMG_7261.jpg)
 
 ![Project - ESP/LoRa side](assets/IMG_7262.jpg)
-
-
-## Improvements
-
-- The implementation is not equal to the Heltec HT-CT62. I unfortunately made a mistake and swapped MOSI and SCK and this should be solved.
-- Using an esp32-c3 supermini the GPIO8 is also connected to the blue LED. This is not a problem but uses more energy.
-- The red LED cannot be turned off so this is also consuming energy.
-- Using an ESP32-S3 with PSRAM is a better choice as also messages can be stored and forwarded.
-- The I2C bus is now mapped to SDA/SCL on GPIO20/GPIO21. The original mapping for the esp32 was SDA/SCL on GPIO01/GPIO00
-- Unused pins can be used for a buzzer or additional IO on the PCB
